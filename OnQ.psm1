@@ -11,5 +11,7 @@ Set-Alias -Name Receive -Value Receive-Event
 $eventSources = Get-EventSource 
 
 foreach ($es in $eventSources) {
-    Set-Alias "On$($es.Name -replace '^@' -replace '\.ps1$')" -Value Watch-Event
+    Set-Alias "On@$($es.Name -replace '^@' -replace '\.ps1$')" -Value Watch-Event
 }
+
+Export-ModuleMember -Alias * -Function *
