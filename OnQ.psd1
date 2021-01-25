@@ -7,10 +7,25 @@
     Copyright = '2021 Start-Automating'
     FormatsToProcess = 'OnQ.format.ps1xml'
     TypesToProcess = 'OnQ.types.ps1xml'
+    AliasesToExport = '*'
     PrivateData = @{
         PSData = @{
+            ProjectURI = 'https://github.com/StartAutomating/OnQ'
+            LicenseURI = 'https://github.com/StartAutomating/OnQ/blob/master/LICENSE'
+
             Tags = 'OnQ', 'Events'
+
+            ReleaseNotes = @'
+0.1:
+---
+Initial Module Release.
+
+Fun simple event syntax (e.g. on mysignal {"do this"} or on delay "00:00:01" {"do that"})
+Better pipelining support for Sending events.
+'@
         }
+
+        
         OnQ = @{
             'Time' = '@Time.ps1'
             'Delay' = '@Delay.ps1'            
