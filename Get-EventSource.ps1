@@ -74,8 +74,15 @@
 
 
         # If we had a module, and we still don't have a match, we'll look for extensions.
+
+        $loadedModules = @(Get-Module)
+        
+        if ($loadedModules -notcontains $myInv.MyCommand.Module) {
+            $loadedModules = @($myInv.MyCommand.Module) + $loadedModules
+        }
         $extendedCommands =
-            foreach ($loadedModule in Get-Module) { # Walk over all modules.
+            
+            foreach ($loadedModule in $loadedModules) { # Walk over all modules.
                 if ( # If the module has PrivateData keyed to this module
                     $loadedModule.PrivateData.($myInv.MyCommand.Module.Name)
                 ) {
