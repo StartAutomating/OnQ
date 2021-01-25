@@ -11,37 +11,44 @@
     If -Error is passed, watched for process error
 #>
 param(
+# The process identifier
 [Parameter(Mandatory,ValueFromPipelineByPropertyName)]
+[Alias('ID')]
 [int]
 $ProcessID,
 
-[Parameter(ValueFromPipelineByPropertyName)]
+# If set, will watch for process exit.  This is the default unless -StandardError or -StandardOutput are passed.
 [switch]
 $Exit,
 
+# If set, will watch for new standard output.
 [switch]
 $StandardOutput,
 
+# If set, will watch for new standard erorr.
 [switch]
 $StandardError
 )
 
-$eventNames = @(
-    if ($Exit) {
-        "Exited"
-    }
-    if ($StandardOutput) {
-        "OutputDataReceived"
-    }
-    if ($StandardError) {
-        "ErrorDataReceived"
-    }
-)
+process {
+    $eventNames = @(
+        if ($Exit) {
+            "Exited"
+        }
+        if ($StandardOutput) {
+            "OutputDataReceived"
+        }
+        if ($StandardError) {
+            "ErrorDataReceived"
+        }
+    )
 
-if ($eventNames) {
-    Get-Process -Id $ProcessID |
-        Add-Member EventName $eventNames -Force -PassThru
-} else {
-    Get-Process -Id $ProcessID |
-        Add-Member EventName "Exited" -Force -PassThru
+    if ($eventNames) {
+        Get-Process -Id $ProcessID |
+            Add-Member EventName $eventNames -Force -PassThru
+    } else {
+        Get-Process -Id $ProcessID |
+            Add-Member EventName "Exited" -Force -PassThru
+    }
+
 }
