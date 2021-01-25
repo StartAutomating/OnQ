@@ -76,12 +76,12 @@
         # If we had a module, and we still don't have a match, we'll look for extensions.
 
         $loadedModules = @(Get-Module)
-        
+
         if ($loadedModules -notcontains $myInv.MyCommand.Module) {
             $loadedModules = @($myInv.MyCommand.Module) + $loadedModules
         }
         $extendedCommands =
-            
+
             foreach ($loadedModule in $loadedModules) { # Walk over all modules.
                 if ( # If the module has PrivateData keyed to this module
                     $loadedModule.PrivateData.($myInv.MyCommand.Module.Name)
@@ -115,20 +115,20 @@
 
     process {
         foreach ($src in $allSources) {
-            if ($Name) { 
-            
-                $ok = 
+            if ($Name) {
+
+                $ok =
                     foreach ($n in $Name) {
                         $src.Name -like "$n" -or
                         $src.Name -replace '^@' -replace '\.ps1$' -like "$n"
                     }
-                
+
                 if (-not $ok) {
                     continue
                 }
             }
 
-            
+
 
             if ($Subscription -or $SourceObject) {
                 if (-not  $script:SubscriptionsByEventSource) { continue }

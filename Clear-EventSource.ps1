@@ -11,6 +11,7 @@
         Get-EventSource
     #>
     [CmdletBinding(SupportsShouldProcess=$true)]
+    [OutputType([nullable])]
     param(
     # The name of the event source.
     [Parameter(ValueFromPipelineByPropertyName)]

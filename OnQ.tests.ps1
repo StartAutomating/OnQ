@@ -42,7 +42,7 @@ describe OnQ {
     it 'Can Receive-Event sent by Send-Event, and -Clear them.' {
         $randomSourceId = "sourceId$(Get-Random)"
         1..3 |
-            Send-Event -SourceIdentifier $randomSourceId 
+            Send-Event -SourceIdentifier $randomSourceId
 
         $outputchecksum = Receive-Event -SourceIdentifier $randomSourceId -Clear |
             Select-Object -ExpandProperty MessageData |
@@ -77,7 +77,7 @@ describe OnQ {
     it 'Can forward an event by providing an empty -Then {}' {
         on repeat "00:00:15" -Then {} # Tell the other Runspace I'm alive every 15 minutes.
         @(
-            Get-EventSubscriber -SourceIdentifier repeat* | 
+            Get-EventSubscriber -SourceIdentifier repeat* |
             Where-Object { $_.ForwardEvent }
         ).Length | Should -BeGreaterOrEqual 1
     }

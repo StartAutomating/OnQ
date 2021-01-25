@@ -202,7 +202,7 @@
                                     # (Side note: without a .Clone, copying is tedious.)
                                     foreach ($prop in $attrCopy.GetType().GetProperties('Instance,Public')) {
                                         if (-not $prop.CanWrite) { continue }
-                                        if ($attr.($prop.Name) -ne $null) {
+                                        if ($null -ne $attr.($prop.Name)) {
                                             $attrCopy.($prop.Name) = $attr.($prop.Name)
                                         }
                                     }
@@ -429,11 +429,11 @@ $then
                         # give it a logical SourceIdentifier.
                         $sourceId = $registerParams["InputObject"].GetType().FullName + ".$evtName"
                         $existingSubscribers = @(Get-EventSubscriber -SourceIdentifier "${sourceID}*")
-                        if ($existingSubscribers) { # (If subscribers exist, increment the source ID))                            
+                        if ($existingSubscribers) { # (If subscribers exist, increment the source ID))
                             $maxSourceId = 0
                             foreach ($es in $existingSubscribers) {
                                 if ($es.SourceIdentifier -match '\.\d+$') {
-                                    $esId = [int]($matches.0 -replace '\.')     
+                                    $esId = [int]($matches.0 -replace '\.')
                                     if ($esId -gt $maxSourceId) {
                                         $maxSourceId = $esId
                                     }

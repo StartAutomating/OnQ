@@ -25,10 +25,10 @@ Better pipelining support for Sending events.
 '@
         }
 
-        
+
         OnQ = @{
             'Time' = '@Time.ps1'
-            'Delay' = '@Delay.ps1'            
+            'Delay' = '@Delay.ps1'
             'ModuleChanged' = 'EventSources/@ModuleChanged.ps1'
             'Job' = 'EventSources/@Job.ps1'
         }
