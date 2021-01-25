@@ -124,18 +124,21 @@
                     # The next possibility is an @.ps1 script.
                     $atFile = "@$($invocationName).ps1"
                     # This could be in a few places: the current directory first,
-                    $localCmd = $getCmd.invoke([IO.Path]::Combine($pwd,$atFile), 'ExternalScript')
+                    $localCmd = $getCmd.invoke(
+                        (Get-ChildItem -LiteralPath $pwd -Filter $atFile).FullName, 'ExternalScript')
                     if ($localCmd) { return $localCmd }
                     # then the directory this script is located in,
                     $myRoot =  $myInv.MyCommand.ScriptBlock.File | Split-Path -ErrorAction SilentlyContinue
-                    $atRootCmd = $getCmd.invoke([IO.Path]::Combine($myRoot,$atFile), 'ExternalScript')
+                    $atRootCmd = $getCmd.invoke(
+                        (Get-ChildItem -LiteralPath $myRoot -Filter $atFile).FullName, 'ExternalScript')
                     if ($atRootCmd) {return $atRootCmd}
 
                     if ($myInv.MyCommand.Module) { # then the module root
                         $MyModuleRoot = $myInv.MyCommand.Module | Split-Path -ErrorAction SilentlyContinue
                         if ($MyModule -ne $myRoot) { # (if different from $myroot).
                             $atModuleRootCmd =
-                                $getCmd.Invoke([IO.Path]::Combine($MyModuleRoot,$atFile), 'ExternalScript')
+                                $getCmd.Invoke(
+                                    (Get-ChildItem -LiteralPath $MyModuleRoot -Filter $atFile).FullName, 'ExternalScript')
                             if ($atModuleRootCmd) { $atModuleRootCmd; continue }
                         }
 
@@ -147,7 +150,7 @@
                             if ( # If a module has a [Hashtable]PrivateData for this module
                                 $loadedModule.PrivateData.$myModuleName
                             ) {
-                                $thisModuleRoot = [IO.Path]::GetPathRoot($loadedModule.Path)
+                                $thisModuleRoot = [IO.Path]::GetDirectoryName($loadedModule.Path)
                                 $extensionData = $loadedModule.PrivateData.$myModuleName
                                 if ($extensionData -is [Hashtable]) { # that is a [Hashtable]
                                     foreach ($ed in $extensionData.GetEnumerator()) { # walk thru the hashtable
