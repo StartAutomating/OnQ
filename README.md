@@ -1,4 +1,5 @@
-﻿OnQ [0.1]
+﻿
+OnQ [0.1]
 =========
 
 Easy Asynchronous Event-Driven Scripting with PowerShell
@@ -67,13 +68,13 @@ In the example below, we set up a handler for "MySignal", and the use the alias 
 ~~~PowerShell
 On MySignal {"Fire $($event.MessageData)!" | Out-Host }
 
-1..3 | Send MySignal # Send-Event can accept pipeline input for MessageData, and will not output unless -PassThru is specified.
+# Send-Event can accept pipeline input for MessageData, and will not output unless -PassThru is specified.
+1..3 | Send MySignal
 ~~~
 
+---
 
-
-
-
+[Understanding Event Sources](Understanding_Event_Sources.md)
 
 
 
