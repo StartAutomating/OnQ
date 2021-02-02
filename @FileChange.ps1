@@ -4,10 +4,6 @@
 .Description
     Uses the [IO.FileSystemWatcher] to watch for changes to files.
 #>
-[Diagnostics.Tracing.EventSource(Name='Changed')]
-[Diagnostics.Tracing.EventSource(Name='Created')]
-[Diagnostics.Tracing.EventSource(Name='Deleted')]
-[Diagnostics.Tracing.EventSource(Name='Renamed')]
 param(
 # The path to the file or directory
 [Parameter(ValueFromPipelineByPropertyName)]
@@ -28,7 +24,13 @@ $NotifyFilter = @("FileName", "DirectoryName", "LastWrite"),
 # If set, will include subdirectories in the watcher.
 [Alias('InludeSubsdirectory','InludeSubsdirectories')]
 [switch]
-$Recurse
+$Recurse,
+
+# The names of the file change events to watch.
+# By default, watches for Changed, Created, Deleted, or Renamed
+[ValidateSet('Changed','Created','Deleted','Renamed')]
+[string[]]
+$EventName = @('Changed','Created','Deleted','Renamed')
 )
 
 process {
@@ -47,7 +49,6 @@ process {
         }
     ))
 
-
     $fileSystemWatcher.EnableRaisingEvents =$true
     $fileSystemWatcher.IncludeSubdirectories = $Recurse
     $fileSystemWatcher.Filter = $FileFilter
@@ -56,5 +57,6 @@ process {
         $combinedNotifyFilter = $combinedNotifyFilter -bor $n
     }
     $fileSystemWatcher.NotifyFilter = $combinedNotifyFilter
-    $fileSystemWatcher
+    $fileSystemWatcher | 
+        Add-Member NoteProperty EventName $EventName -Force -PassThru
 }
