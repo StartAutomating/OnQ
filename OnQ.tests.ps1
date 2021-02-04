@@ -74,15 +74,19 @@ describe OnQ {
         $MyTimer | Watch-Event -SourceIdentifier Elapsed -Then { "it's time"}
     }
 
-    it 'Can forward an event by providing an empty -Then {}' {
-        on repeat "00:00:15" -Then {} # Tell the other Runspace I'm alive every 15 minutes.
-        @(
-            Get-EventSubscriber -SourceIdentifier repeat* |
-            Where-Object { $_.ForwardEvent }
-        ).Length | Should -BeGreaterOrEqual 1
+    it 'Can broadly signal an event by providing an empty -Then {}' {
+        on delay "00:00:00.1" -Then {} # Signal in a tenth of a second.
+        Start-Sleep -Milliseconds 250
+        $eventTimestamp = Get-Event -SourceIdentifier "System.Timers.Timer.*" |
+            Sort-Object TimeGenerated -Descending |
+            Select-Object -First 1 -ExpandProperty TimeGenerated
+        ([DateTime]::Now - $eventTimestamp) |
+            Should -BeLessOrEqual ([Timespan]"00:00:01")
     }
 
     it 'Can receive results from event subscriptions' {
+        on delay "00:00:00.1" -Then {1} # Signal in a tenth of a second.
+        Start-Sleep -Milliseconds 250
         $receivedResults = @(Get-EventSource -Name Delay -Subscription | Receive-Event)
         $receivedResults.Length | Should -BeGreaterOrEqual 1
     }
@@ -102,6 +106,26 @@ describe OnQ {
             Clear-EventSource
             $esCount2 = @(Get-EventSubscriber).Length
             $esCount | Should -BeGreaterThan $esCount2
+        }
+    }
+
+    context BuiltInEventSources {
+        it 'Can run Powershell asynchronously' {
+            On@PowerShellAsync -ScriptBlock { "hello world" } -Then {}
+            1..4 | Start-Sleep -Milliseconds { 250 }
+            Get-Event -SourceIdentifier PowerShell.Async.* |
+                Sort-Object TimeGenerated -Descending |
+                Select-Object -First 1 -ExpandProperty MessageData |
+                Should -Be "hello world"
+        }
+        it 'Can get a signal when an HTTPResponse is received' {
+            On@HttpResponse -Uri https://github.com/ -Then {}
+            1..4 | Start-Sleep -Milliseconds { 250 }
+            $responseContent = Get-Event -SourceIdentifier "HttpRequest.Completed.*" |
+                Sort-Object TimeGenerated -Descending |
+                Select-Object -First 1 -ExpandProperty MessageData |
+                Select-Object -ExpandProperty ResponseContent
+            $responseContent | Should -BeLike "*<html*"
         }
     }
 }

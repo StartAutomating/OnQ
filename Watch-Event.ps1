@@ -262,9 +262,10 @@
         $thenParam = [Management.Automation.ParameterAttribute]::new()
         $thenParam.Mandatory = $true #* [ScriptBlock]$then
         $thenParam.Position = $maxPosition
+        $thenActionAlias = [Management.Automation.AliasAttribute]::new("Action")
         $DynamicParameters.Add("Then",
                         [Management.Automation.RuntimeDefinedParameter]::new(
-                            "Then", [ScriptBlock], $thenParam
+                            "Then", [ScriptBlock], @($thenParam, $thenActionAlias)
                         )
                     )
         $maxPosition++
@@ -369,7 +370,7 @@ $($parameterCopy | Out-String)
 
         #region Handle -SourceIdentifier and -InputObject
         if ($PSBoundParameters['SourceIdentifier']) { # If we have a -SourceIdentifier
-            if ($PSBoundParameters['InputObject']) { # and an -InputObject
+            if ($PSBoundParameters['InputObject'] -and -not $eventSource) { # and an -InputObject (but not not an eventsource)
                 # then the register command is Register-ObjectEvent.
                 $registerCmd = $ExecutionContext.SessionState.InvokeCommand.GetCommand('Register-ObjectEvent','Cmdlet')
 
@@ -441,6 +442,8 @@ $then
                             }
                             $sourceID = $sourceId + ".$($maxSourceId + 1)"
                         }
+
+                        # Then call Register-ObjectEvent
                         & $registerCmd @registerParams -EventName $evtName -SourceIdentifier $sourceId
                     }
                 }
@@ -448,11 +451,12 @@ $then
                 {
                     $sourceIdList = $registerParams["SourceIdentifier"]
                     $null = $registerParams.Remove('SourceIdentifier')
-                    # If we don't have an action, set up an event forwarder instead.
-                    if (-not $registerParams.Action) { $registerParams.Forward = $true }
-                    # Call Register-Engine event with each source identifier.
-                    foreach ($sourceId in $sourceIdList) {
-                        & $registerCmd @registerParams -SourceIdentifier $sourceId
+                    # If we don't have an action, don't run anything (this will let the events "bubble up" to the runspace).
+                    if ($registerParams.Action) {
+                        # If we do have an action, call Register-Engine event with each source identifier.
+                        foreach ($sourceId in $sourceIdList) {
+                            & $registerCmd @registerParams -SourceIdentifier $sourceId
+                        }
                     }
                 }
             }
@@ -481,6 +485,22 @@ $then
                 } else {
                     $eventSubscription
                 }
+
+            $eventSourceInitializeAttribute= $eventSource.ScriptBlock.Attributes |
+                Where-Object TypeID -EQ ([ComponentModel.InitializationEventAttribute])
+            if ($eventSourceOutput.InitializeEvent -and $eventSourceOutput.InitializeEvent -is [string]) {
+                $eventSourceOutput.$($eventSourceOutput.InitializeEvent).Invoke()
+            }
+            elseif ($eventSourceOutput.InitializeEvent -and $eventSourceOutput.InitializeEvent -is [ScriptBlock]) {
+                $this = $sender = $eventSourceOutput
+                & ([ScriptBlock]::Create($eventSourceInitializeAttribute.EventName))
+            }
+            elseif ($eventSourceInitializeAttribute.EventName -match '^[\w\-]+$') {
+                $eventSourceOutput.($eventSourceInitializeAttribute.EventName).Invoke()
+            } else {
+                $this = $sender = $eventSourceOutput
+                & ([ScriptBlock]::Create($eventSourceInitializeAttribute.EventName))
+            }
         }
 
         #endregion Keep track of Subscription
