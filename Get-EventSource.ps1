@@ -142,7 +142,10 @@
                     }
                 if (-not  $script:SubscriptionsByEventSource[$eventSourceKey]) { continue }
                 if ($Subscription) {
-                    $script:SubscriptionsByEventSource[$eventSourceKey]
+                    $script:SubscriptionsByEventSource[$eventSourceKey] |
+                        Where-Object {
+                            [Runspace]::DefaultRunspace.Events.Subscribers -contains $_
+                        }
                 } else {
                     if ($script:SubscriptionsByEventSource[$eventSourceKey].SourceObject) {
                         $script:SubscriptionsByEventSource[$eventSourceKey].SourceObject
