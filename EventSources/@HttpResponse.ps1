@@ -154,7 +154,7 @@ process {
             [IO.StreamWriter]::new($requestStream, $TransferEncoding).Write($Body)
         }
         else {
-            [IO.StreamWriter]::new($requestStream, $TransferEncoding).Write((ConvertTo-Json -InputObject $body))
+            [IO.StreamWriter]::new($requestStream, $TransferEncoding).Write((ConvertTo-Json -InputObject $body -Depth 100))
         }
     }
     $requestId   = [Guid]::NewGuid().ToString() 
