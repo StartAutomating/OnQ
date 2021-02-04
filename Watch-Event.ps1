@@ -451,11 +451,12 @@ $then
                 {
                     $sourceIdList = $registerParams["SourceIdentifier"]
                     $null = $registerParams.Remove('SourceIdentifier')
-                    # If we don't have an action, set up an event forwarder instead.
-                    if (-not $registerParams.Action) { $registerParams.Forward = $true }
-                    # Call Register-Engine event with each source identifier.
-                    foreach ($sourceId in $sourceIdList) {
-                        & $registerCmd @registerParams -SourceIdentifier $sourceId
+                    # If we don't have an action, don't run anything (this will let the events "bubble up" to the runspace).
+                    if ($registerParams.Action) {
+                        # If we do have an action, call Register-Engine event with each source identifier.
+                        foreach ($sourceId in $sourceIdList) {
+                            & $registerCmd @registerParams -SourceIdentifier $sourceId
+                        }
                     }
                 }
             }
