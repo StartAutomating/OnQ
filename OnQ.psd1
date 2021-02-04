@@ -29,8 +29,11 @@ Better pipelining support for Sending events.
         OnQ = @{
             'Time' = '@Time.ps1'
             'Delay' = '@Delay.ps1'
+            'Process' = 'EventSources/@Process.ps1'
             'ModuleChanged' = 'EventSources/@ModuleChanged.ps1'
             'Job' = 'EventSources/@Job.ps1'
+            'PowerShellAsync' = 'EventSources/@PowerShellAsync.ps1'
+            'HttpResponse' = 'EventSources/@HttpResponse.ps1'
         }
     }
 }
