@@ -38,7 +38,7 @@ process {
     $null = for ($n =0; $n -lt $ScriptBlock.Length;$n++) {
         $psAsync.AddStatement()
         $psAsync.AddScript($sb)
-        if ($Parameter[$n]) {
+        if ($parameter -and $Parameter[$n]) {
             $psAsync.AddParameters($Parameter[$n])
         }
     }
