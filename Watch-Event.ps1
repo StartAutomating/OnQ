@@ -408,7 +408,7 @@ $then
             }
         }
 
-        if ("$then") { # If -Then is not blank.
+        if ("$then" -replace '\s') { # If -Then is not blank.
             $registerParams["Action"] = $Then # this maps to the -Action parameter the Register- comamnd.
         }
         #endregion Handle When and Then
