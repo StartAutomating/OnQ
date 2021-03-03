@@ -46,6 +46,7 @@ Better pipelining support for Sending events.
             'Job' = 'EventSources/@Job.ps1'
             'PowerShellAsync' = 'EventSources/@PowerShellAsync.ps1'
             'HttpResponse' = 'EventSources/@HttpResponse.ps1'
+            UDP = 'EventSources/@UDP.ps1'
         }
     }
 }
