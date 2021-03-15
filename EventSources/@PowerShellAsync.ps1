@@ -35,9 +35,9 @@ $RunspacePool
 
 process {
     $psAsync = [PowerShell]::Create()
-    $null = for ($n =0; $n -lt $ScriptBlock.Length;$n++) {
+    $null = for ($n =0; $n -lt $ScriptBlock.Length;$n++) {        
         $psAsync.AddStatement()
-        $psAsync.AddScript($sb)
+        $psAsync.AddScript($ScriptBlock[$n])
         if ($parameter -and $Parameter[$n]) {
             $psAsync.AddParameters($Parameter[$n])
         }
