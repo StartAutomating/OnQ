@@ -1,21 +1,28 @@
 ﻿<#
-
+.Synopsis
+    Signals on UDP 
+.Description
+    Runs PowerShell in the background.  
+    Events are fired on the completion or failure of the PowerShell command.
 #>
 param(
+# The IP Address where UDP packets can originate.  By default, [IPAddress]::Any.
 [Parameter(ValueFromPipelineByPropertyName)]
 [Net.IPAddress]
 $IPAddress = [Net.IPAddress]::Any,
 
+# The Port used to listen for packets.
 [Parameter(Mandatory,ValueFromPipelineByPropertyName)]
 [int]
 $Port,
 
+# The encoding.  If provided, packet content will be decoded.
 [Parameter(ValueFromPipelineByPropertyName)]
 [Text.Encoding]
 $Encoding
 )
 
-$UdpBackgroundJob = {
+$startedJob = Start-Job -ScriptBlock {
     param($IPAddress, $port, $encoding)
     
     $udpSvr=  [Net.Sockets.UdpClient]::new()
@@ -46,9 +53,8 @@ $UdpBackgroundJob = {
         }
         
     }
-}
+} -ArgumentList $IPAddress, $port, $Encoding
 
-$startedJob = Start-Job -ScriptBlock $UdpBackgroundJob -ArgumentList $IPAddress, $port, $Encoding
 @{
     SourceIdentifier = "UDP.${IPAddress}:$port"
 }
