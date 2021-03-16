@@ -19,6 +19,11 @@ param(
 [ScriptBlock[]]
 $ScriptBlock,
 
+# The named parameters passed to each script.
+[Collections.IDictionary[]]
+[Alias('Parameters')]
+$Parameter,
+
 # If provided, will run in a specified runspace.  The Runspace must already be open.
 [Management.Automation.Runspaces.Runspace]
 $Runspace,
@@ -30,9 +35,12 @@ $RunspacePool
 
 process {
     $psAsync = [PowerShell]::Create()
-    $null = foreach ($sb in $scriptblock) {
+    $null = for ($n =0; $n -lt $ScriptBlock.Length;$n++) {        
         $psAsync.AddStatement()
-        $psAsync.AddScript($sb)           
+        $psAsync.AddScript($ScriptBlock[$n])
+        if ($parameter -and $Parameter[$n]) {
+            $psAsync.AddParameters($Parameter[$n])
+        }
     }
     foreach ($cmd in $psAsync.Commands) {
         foreach ($ce in $cmd.Commands) {
