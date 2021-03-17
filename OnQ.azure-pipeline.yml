@@ -481,9 +481,6 @@ stages:
                   Publish-Module -Path $moduleTempPath -NuGetApiKey $gk
                   if ($?) {
                       Write-Host "Published to Gallery"
-              
-                      git tag "v$($imported.Version)" -m "$($foundModule.Name) v$($imported.Version)"
-                      git push origin "v$($imported.Version)" --tags
                   } else {
                       Write-Host "Gallery Publish Failed"
                       exit 1
