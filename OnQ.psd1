@@ -1,4 +1,4 @@
-﻿@{
+@{
     RootModule = 'OnQ.psm1'
     Description = 'Easy Asynchronous Event-Driven Scripting with PowerShell'
     ModuleVersion = '0.1.2'

@@ -3,6 +3,9 @@
     Watches for File Changes.
 .Description
     Uses the [IO.FileSystemWatcher] to watch for changes to files.
+
+    Because some applications and frameworks write to files differently, 
+    you may see more than one event for a given change.
 #>
 param(
 # The path to the file or directory
@@ -41,17 +44,22 @@ process {
         return
     }
 
-    $fileSystemWatcher = [IO.FileSystemWatcher]::new($(
-        if ($resolvedFilePath) {
-            $resolvedFilePath
-        } else {
-            $FilePath
-        }
-    ))
+    if ([IO.File]::Exists("$resolvedFilePath")) { # If we're passed a path to a specific file
+        $fileInfo = ([IO.FileInfo]"$resolvedFilePath")   
+        $filePath = $fileInfo.Directory.FullName  # we need to watch the directory
+        $FileFilter = $fileInfo.Name              # and then filter based off of the file name.
+    } elseif ([IO.Directory]::Exists("$resolvedFilePath")) {
+        $filePath = "$resolvedFilePath"
+    }
 
-    $fileSystemWatcher.EnableRaisingEvents =$true
-    $fileSystemWatcher.IncludeSubdirectories = $Recurse
-    $fileSystemWatcher.Filter = $FileFilter
+    $fileSystemWatcher = [IO.FileSystemWatcher]::new($FilePath) # Create the watcher
+    $fileSystemWatcher.IncludeSubdirectories = $Recurse         # include subdirectories if -Recurse was passed
+    $fileSystemWatcher.EnableRaisingEvents = $true              # Enable raising events
+    if ($FileFilter) {
+        $fileSystemWatcher.Filter = $FileFilter
+    } else {
+        $fileSystemWatcher.Filter = "*"
+    }
     $combinedNotifyFilter = 0
     foreach ($n in $NotifyFilter) {
         $combinedNotifyFilter = $combinedNotifyFilter -bor $n
