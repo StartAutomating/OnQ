@@ -1,4 +1,4 @@
-﻿@{
+@{
     RootModule = 'OnQ.psm1'
     Description = 'Easy Asynchronous Event-Driven Scripting with PowerShell'
     ModuleVersion = '0.1.2'
@@ -16,6 +16,12 @@
             Tags = 'OnQ', 'Events'
 
             ReleaseNotes = @'
+0.1.2:
+---
+New Event Source:
+* UDP
+
+PowerShellAsync Event Source now allows for a -Parameter dictionaries.
 0.1.1:
 ---
 New Event Sources:
@@ -46,7 +52,7 @@ Better pipelining support for Sending events.
             'Job' = 'EventSources/@Job.ps1'
             'PowerShellAsync' = 'EventSources/@PowerShellAsync.ps1'
             'HttpResponse' = 'EventSources/@HttpResponse.ps1'
-            'UDP' = 'EventSources/@UDP.ps1'
+            UDP = 'EventSources/@UDP.ps1'
         }
     }
 }
