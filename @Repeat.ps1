@@ -18,4 +18,5 @@ $Interval
 process {
     $timer = New-Object Timers.Timer -Property @{Interval=$Interval.TotalMilliseconds;AutoReset=$true}
     $timer.Start()
+    $timer
 }
