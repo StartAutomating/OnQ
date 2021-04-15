@@ -19,10 +19,10 @@ process {
     Get-PSBreakpoint | Where-Object Variable -eq $VariableName | Remove-PSBreakpoint
 
     $raiseEvent = [ScriptBlock]::Create(@"
-New-Event -SourceIdentifier 'VariableChanged.$variableName' -MessageData `$$variableName -Sender (Get-PSCallstack)
+New-Event -SourceIdentifier 'VariableSet.$variableName' -MessageData `$$variableName -Sender (Get-PSCallstack)
 continue
 "@)
     Set-PSBreakpoint -Variable $VariableName -Action $raiseEvent | Out-Null
 
-    [PSCustomObject]@{SourceIdentifier="VariableChanged.$variableName"}
+    [PSCustomObject]@{SourceIdentifier="VariableSet.$variableName"}
 }
