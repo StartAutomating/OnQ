@@ -11,6 +11,8 @@
         Watch-Event
     .Example
         Get-EventSource -Subscriber | Receive-Event
+    .Example
+        Receive-Event -SourceIdentifier * -First 1 # Receives the most recent event with any source identifier.
     #>
     [CmdletBinding(DefaultParameterSetName='Instance')]
     [OutputType([PSObject], [Management.Automation.PSEventArgs])]
@@ -32,6 +34,14 @@
     [string[]]
     $SourceIdentifier,
 
+    # If provided, will return the first N events
+    [int]
+    $First,
+
+    # If provided, will skip the first N events.
+    [int]
+    $Skip,
+
     # The input object.
     # If the Input Object was a job, it will receive the results of the job.
     [Parameter(ValueFromPipeline)]
@@ -51,30 +61,49 @@
         # We will accumulate the events we output in case we need to -Clear them.
         $accumulated = [Collections.Arraylist]::new()
         filter accumulate {
-            $_
-            $null = $accumulated.Add($_)
+            if (-not $skip -or ($accumulated.Count -ge $skip)) {
+                $_
+            }
+
+            if (-not $First -or ($accumulated.Count -lt ($First + $skip))) {
+                $null = $accumulated.Add($_)
+            }
         }
         #endregion Prepare Accumulation
     }
     process {
-        #region Receiving Events by EventIdentifier
-        if ($PSCmdlet.ParameterSetName -eq 'EventIdentifier') {
-            # If we're receiving events by EventIdentifier
-            if ($_ -is [Management.Automation.PSEventArgs]) {
-                $_ | accumulate # pass events thru and accumulate them for later.
-            } else {
-                $eventIdentifier |  # Otherwise, find all events with those EventIdentifiers.
-                    Get-Event -EventIdentifier { $_ } -ErrorAction SilentlyContinue |
-                    accumulate      # output them as we go an accumulate them for later.
-            }
+        #region Passthru Events
+        if ($PSCmdlet.ParameterSetName -eq 'EventIdentifier' -and 
+            $_ -is [Management.Automation.PSEventArgs]) {
+            $_ | accumulate # pass events thru and accumulate them for later.
             return
         }
-        #endregion Receiving Events by EventIdentifier
+        #endregion PassThru Events
         #region Receiving Events by SourceIdentifier
-        if ($PSCmdlet.ParameterSetName -eq 'SourceIdentifier') {
-            $SourceIdentifier | # Get-Event for each sourceidentifier
-                Get-Event -ErrorAction SilentlyContinue -SourceIdentifier { $_ } |
-                accumulate # output them as we go an accumulate them for later.
+        if ($PSCmdlet.ParameterSetName -in 'SourceIdentifier', 'EventIdentifier') {
+            :nextEvent for ($ec = $PSCmdlet.Events.ReceivedEvents.Count -1 ; $ec -ge 0; $ec--) {
+                $evt = $PSCmdlet.Events.ReceivedEvents[$ec]
+                if ($SourceIdentifier) {
+                    foreach ($sid in $sourceIdentifier) {
+                        if ($evt.SourceIdentifier -eq $sid -or $evt.SourceIdentifier -like $sid) {
+                            $evt | accumulate                        
+                        }
+                        if ($First -and $accumulated.Count -ge ($First + $Skip)) {
+                            break nextEvent
+                        }
+                    }
+                }
+                if ($EventIdentifier) {
+                    foreach ($eid in $EventIdentifier) {
+                        if ($evt.EventIdentifier -eq $eid) {
+                            $evt | accumulate
+                        }
+                        if ($First -and $accumulated.Count -ge ($First + $Skip)) {
+                            break nextEvent
+                        }
+                    }
+                }
+            }
             return
         }
         #endregion Receiving Events by SourceIdentifier
