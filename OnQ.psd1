@@ -1,7 +1,7 @@
 @{
     RootModule = 'OnQ.psm1'
     Description = 'Easy Asynchronous Event-Driven Scripting with PowerShell'
-    ModuleVersion = '0.1.2'
+    ModuleVersion = '0.1.3'
     GUID = 'ba5ad698-89a1-4887-9511-59f9025989b1'
     Author = 'James Brundage'
     Copyright = '2021 Start-Automating'
@@ -16,6 +16,14 @@
             Tags = 'OnQ', 'Events'
 
             ReleaseNotes = @'
+0.1.3:
+---
+New Event Source:
+* VariableSet
+
+Receive-Event now returns event most-recent to least-recent.
+Receive-Event now has -First and -Skip.
+
 0.1.2:
 ---
 New Event Source:
