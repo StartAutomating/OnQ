@@ -24,6 +24,8 @@ New Event Source:
 Receive-Event now returns event most-recent to least-recent.
 Receive-Event now has -First and -Skip.
 
+Bugfix:  On@Repeat now actually starts it's timer.
+
 0.1.2:
 ---
 New Event Source:
